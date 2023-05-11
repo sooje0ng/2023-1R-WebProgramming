@@ -18,6 +18,7 @@ function App() {
     setCount((prev) => prev + 1);
   };
 
+  //수업시간 실습내용
   useEffect(() => {
     console.log("mount or update");
 
@@ -26,7 +27,6 @@ function App() {
     };
   });
 
-  //수업시간 실습내용
   useEffect(() => {
     console.log("mount only");
     fetch(
