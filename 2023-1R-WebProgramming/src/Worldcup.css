@@ -4,6 +4,9 @@
 }
 
 .header_title {
+  position: absolute;
+  top: 0;
+  left: 0;
   margin: 0;
   width: 100%;
   height: 50px;
@@ -13,10 +16,58 @@
   text-align: center;
 }
 
-.image_box {
-  width: 100%;
-  height: 500px;
+.image_wrap {
+  margin: 0 auto;
+  width: 1000px;
+  height: 1000px;
   display: flex;
   flex-direction: row;
   justify-content: center;
+}
+.image_box {
+  cursor: pointer;
+  width: 50%;
+  height: 500px;
+}
+
+.image_left,
+.image_right {
+  width: 100%;
+  height: 100%;
+}
+.image_text_left {
+  font-size: 20px;
+  color: white;
+  width: 100%;
+  position: absolute;
+  top: 30%;
+  left: 20%;
+  text-shadow: -1px 0 #000000, 0 1px #000000, 1px 0 #000000, 0 -1px #000000;
+}
+.image_text_right {
+  font-size: 20px;
+  color: white;
+  width: 100%;
+  position: absolute;
+  text-shadow: -1px 0 #000000, 0 1px #000000, 1px 0 #000000, 0 -1px #000000;
+  top: 30%;
+  left: 70%;
+}
+
+.image_selected_wrapper {
+  width: 500px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.image_selected {
+  width: 500px;
+  height: 500px;
+}
+
+.image_winner {
+  margin: 0 auto;
+  width: fit-content;
+
+  text-align: center;
 }
