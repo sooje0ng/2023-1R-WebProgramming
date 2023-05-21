@@ -16,6 +16,8 @@ import p13 from './assets/이수혁.jpeg';
 import p14 from './assets/정해인.jpeg';
 import p15 from './assets/차은우.jpeg';
 import p16 from './assets/현빈.jpeg';
+import Chart from 'chart.js/auto';
+import { Bar } from 'react-chartjs-2';
 
 const candidate = [
   { name: '공유', src: p01 },
@@ -42,30 +44,29 @@ function Worldcup() {
   const [nextGame, setNextGame] = useState([]);
   const [selectedImage, setSelectedImage] = useState();
   //통계정보 저장하는 state
-  const [stat, setStat] = useState(
-    candidate.map((item) => ({ [item.name]: 0 }))
-    // 공유: 0,
-    // 김선호: 0,
-    // 남주혁: 0,
-    // 박보검: 0,
-    // 박서준: 0,
-    // 서강준: 0,
-    // 송강: 0,
-    // 송중기: 0,
-    // 안보현: 0,
-    // 안효섭: 0,
-    // 이도현: 0,
-    // 이동욱: 0,
-    // 이수혁: 0,
-    // 정해인: 0,
-    // 차은우: 0,
-    // 현빈: 0,
-  );
+  const [stat, setStat] = useState({
+    공유: 0,
+    김선호: 0,
+    남주혁: 0,
+    박보검: 0,
+    박서준: 0,
+    서강준: 0,
+    송강: 0,
+    송중기: 0,
+    안보현: 0,
+    안효섭: 0,
+    이도현: 0,
+    이동욱: 0,
+    이수혁: 0,
+    정해인: 0,
+    차은우: 0,
+    현빈: 0,
+  });
 
   useEffect(() => {
-    const worldcupLocalStorageData = localStorage.getItem('월드컵');
-    if (worldcupLocalStorageData != null) {
-      setStat(JSON.parse(worldcupLocalStorageData));
+    const localStorageData = localStorage.getItem('2019111615');
+    if (localStorageData != null) {
+      setStat(JSON.parse(localStorageData));
     }
     setGame(
       candidate
@@ -89,35 +90,8 @@ function Worldcup() {
       setNextGame((prev) => prev.concat(game[index]));
       setRound((prev) => prev + 1);
       setSelectedImage(null);
-    }, 3000);
+    });
   };
-
-  if (game.length === 1) {
-    localStorage.setItem('월드컵', JSON.stringify(stat));
-    return (
-      <div>
-        <p className='header_title'>이상형 월드컵 우승</p>
-        <div className='image_winner'>
-          <img src={game[0].src} className='winner' />
-          <p>{game[0].name}</p>
-          <p>{stat[game[0].name]}번 승리</p>
-        </div>
-        <table>
-          {Object.keys(stat).map((name) => {
-            return (
-              <tr key={name}>
-                <td>{name}</td>
-                <td>{stat[name]}</td>
-              </tr>
-            );
-          })}
-        </table>
-      </div>
-    );
-  }
-
-  if (game.length === 0 || round + 1 > game.length / 2)
-    return <p>로딩중입니다.</p>;
 
   const left = round * 2;
   const right = round * 2 + 1;
@@ -136,6 +110,54 @@ function Worldcup() {
       [game[right].name]: stat[game[right].name] + 1,
     });
   };
+
+  //통계 chart.js
+  const dataName = Object.keys(JSON.parse(localStorage.getItem('2019111615')));
+  const dataCount = Object.values(
+    JSON.parse(localStorage.getItem('2019111615'))
+  );
+  const data = {
+    labels: dataName,
+    datasets: [
+      {
+        label: '이상형 월드컵 통계',
+        data: dataCount,
+        borderWidth: 1,
+      },
+    ],
+  };
+  if (game.length === 1) {
+    localStorage.setItem('2019111615', JSON.stringify(stat));
+    return (
+      <>
+        <div>
+          <p className='header_title'>이상형 월드컵 우승</p>
+          <div className='image_winner'>
+            <img src={game[0].src} className='winner' />
+            <p>{game[0].name}</p>
+            <p>{stat[game[0].name]}번 승리</p>
+          </div>
+          {/* <table>
+            {Object.keys(stat).map((name) => {
+              return (
+                <tr key={name}>
+                <td>{name}</td>
+                <td>{stat[name]}</td>
+                </tr>
+                );
+              })}
+            </table> */}
+        </div>
+        <div>
+          <Bar type='bar' data={data} />
+        </div>
+      </>
+    );
+  }
+
+  if (game.length === 0 || round + 1 > game.length / 2) {
+    return <p>로딩중입니다.</p>;
+  }
 
   return (
     <div className='wrapper'>
@@ -159,7 +181,7 @@ function Worldcup() {
                 src={game[left].src}
                 onClick={leftFunction}
               />
-              <div className='image_text_left'>
+              <div className='image_text left'>
                 <p>{game[round * 2].name}</p>
               </div>
             </div>
@@ -169,7 +191,7 @@ function Worldcup() {
                 src={game[right].src}
                 onClick={rightFunction}
               />
-              <div className='image_text_right'>
+              <div className='image_text right'>
                 <p>{game[right].name}</p>
               </div>
             </div>
