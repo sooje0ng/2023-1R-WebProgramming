@@ -1,5 +1,6 @@
 import './Worldcup.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
+
 import p01 from './assets/공유.jpeg';
 import p02 from './assets/김선호.jpeg';
 import p03 from './assets/남주혁.jpeg';
@@ -38,78 +39,130 @@ const candidate = [
   { name: '현빈', src: p16 },
 ];
 
+function reducer(state, action) {
+  if (action.type === 'startGame') {
+    if (action.value.stat) {
+      return { ...state, game: action.value.game, stat: action.value.stat };
+      // return { ...state, ...action.value };
+    } else {
+      return { ...state, game: action.value.game };
+    }
+  } else if (action.type === 'click') {
+    //game의 마지막 경기인지 아닌지 확인
+    if (state.game.length > 1 && state.round + 1 >= state.game.length / 2) {
+      return {
+        ...state,
+        round: 0,
+        nextGame: [],
+        game: state.nextGame.concat(state.game[action.value]),
+        stat: {
+          ...state.stat,
+          [state.game[action.value].name]:
+            state.stat[state.game[action.value].name] + 1,
+        },
+      };
+    }
+    //마지막경기가 아닐때!
+    else {
+      return {
+        ...state,
+        round: state.round + 1,
+        nextGame: state.nextGame.concat(state.game[action.value]),
+        stat: {
+          ...state.stat,
+          [state.game[action.value].name]:
+            state.stat[state.game[action.value].name] + 1,
+        },
+      };
+    }
+  }
+  return state;
+}
+
 function Worldcup() {
-  const [game, setGame] = useState([]);
-  const [round, setRound] = useState(0);
-  const [nextGame, setNextGame] = useState([]);
-  const [selectedImage, setSelectedImage] = useState();
+  const initialState = {
+    game: [],
+    round: 0,
+    nextGame: [],
+    selectedImage: '',
+    stat: {
+      공유: 0,
+      김선호: 0,
+      남주혁: 0,
+      박보검: 0,
+      박서준: 0,
+      서강준: 0,
+      송강: 0,
+      송중기: 0,
+      안보현: 0,
+      안효섭: 0,
+      이도현: 0,
+      이동욱: 0,
+      이수혁: 0,
+      정해인: 0,
+      차은우: 0,
+      현빈: 0,
+    },
+  };
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+  // const [game, setGame] = useState([]);
+  // const [round, setRound] = useState(0);
+  // const [nextGame, setNextGame] = useState([]);
+  // const [selectedImage, setSelectedImage] = useState();
   //통계정보 저장하는 state
-  const [stat, setStat] = useState({
-    공유: 0,
-    김선호: 0,
-    남주혁: 0,
-    박보검: 0,
-    박서준: 0,
-    서강준: 0,
-    송강: 0,
-    송중기: 0,
-    안보현: 0,
-    안효섭: 0,
-    이도현: 0,
-    이동욱: 0,
-    이수혁: 0,
-    정해인: 0,
-    차은우: 0,
-    현빈: 0,
-  });
+  // const [stat, setStat] = useState({
+  //   공유: 0,
+  //   김선호: 0,
+  //   남주혁: 0,
+  //   박보검: 0,
+  //   박서준: 0,
+  //   서강준: 0,
+  //   송강: 0,
+  //   송중기: 0,
+  //   안보현: 0,
+  //   안효섭: 0,
+  //   이도현: 0,
+  //   이동욱: 0,
+  //   이수혁: 0,
+  //   정해인: 0,
+  //   차은우: 0,
+  //   현빈: 0,
+  // });
 
   useEffect(() => {
     const localStorageData = localStorage.getItem('2019111615');
-    if (localStorageData != null) {
-      setStat(JSON.parse(localStorageData));
-    }
-    setGame(
-      candidate
-        .map((c) => ({ ...c, order: Math.random() }))
-        .sort((l, r) => l.order - r.order)
-    );
+    const statistics = !localStorageData ? JSON.parse(localStorageData) : {};
+    const shuffledCandidate = candidate
+      .map((c) => ({ ...c, order: Math.random() }))
+      .sort((l, r) => l.order - r.order);
+
+    dispatch({
+      type: 'startGame',
+      value: { game: shuffledCandidate, state: statistics },
+    });
   }, []);
 
-  useEffect(() => {
-    if (game.length > 1 && round + 1 > game.length / 2) {
-      setGame(nextGame);
-      setNextGame([]);
-      setRound(0);
-    }
-  }, [round]);
+  // useEffect(() => {
+  //   if (game.length > 1 && round + 1 > game.length / 2) {
+  //     setGame(nextGame);
+  //     setNextGame([]);
+  //     setRound(0);
+  //   }
+  // }, [round]);
 
-  const onClickImage = (index) => {
-    setSelectedImage(game[index].src);
-    //3초동안 클릭한 이미지 보이고 다음라운드 넘어감
-    setTimeout(() => {
-      setNextGame((prev) => prev.concat(game[index]));
-      setRound((prev) => prev + 1);
-      setSelectedImage(null);
-    });
-  };
+  // const onClickImage = (index) => {
+  //   setSelectedImage(game[index].src);
+  //   //3초동안 클릭한 이미지 보이고 다음라운드 넘어감
+  //   setTimeout(() => {
+  //     setNextGame((prev) => prev.concat(state.game[index]));
+  //     setRound((prev) => prev + 1);
+  //     setSelectedImage(null);
+  //   });
+  // };
 
-  const left = round * 2;
-  const right = round * 2 + 1;
-
-  const leftFunction = () => {
-    onClickImage(left);
-    setStat({
-      ...stat,
-      [game[left].name]: stat[game[left].name] + 1,
-    });
-  };
-  const rightFunction = () => {
-    onClickImage(right);
-    setStat({
-      ...stat,
-      [game[right].name]: stat[game[right].name] + 1,
-    });
-  };
+  const left = state.round * 2;
+  const right = state.round * 2 + 1;
 
   //통계 chart.js
   const dataName = Object.keys(JSON.parse(localStorage.getItem('2019111615')));
@@ -126,16 +179,16 @@ function Worldcup() {
       },
     ],
   };
-  if (game.length === 1) {
-    localStorage.setItem('2019111615', JSON.stringify(stat));
+  if (state.game.length === 1) {
+    localStorage.setItem('2019111615', JSON.stringify(state.stat));
     return (
       <>
         <div>
           <p className='header_title'>이상형 월드컵 우승</p>
           <div className='image_winner'>
-            <img src={game[0].src} className='winner' />
-            <p>{game[0].name}</p>
-            <p>{stat[game[0].name]}번 승리</p>
+            <img src={state.game[0].src} className='winner' />
+            <p>{state.game[0].name}</p>
+            <p>{state.stat[state.game[0].name]}번 승리</p>
           </div>
           {/* <table>
             {Object.keys(stat).map((name) => {
@@ -155,22 +208,22 @@ function Worldcup() {
     );
   }
 
-  if (game.length === 0 || round + 1 > game.length / 2) {
+  if (state.game.length === 0 || state.round + 1 > state.game.length / 2) {
     return <p>로딩중입니다.</p>;
   }
 
   return (
     <div className='wrapper'>
       <p className='header_title'>
-        이상형 월드컵 {round + 1} / {game.length / 2}{' '}
-        <b>{game.length === 2 ? '결승' : game.length + '강'}</b>
+        이상형 월드컵 {state.round + 1} / {state.game.length / 2}{' '}
+        <b>{state.game.length === 2 ? '결승' : state.game.length + '강'}</b>
       </p>
 
       <div className='image_wrap'>
-        {selectedImage ? (
+        {state.selectedImage ? (
           <>
             <div className='image_selected_wrapper'>
-              <img src={selectedImage} className='image_selected' />
+              <img src={state.selectedImage} className='image_selected' />
             </div>
           </>
         ) : (
@@ -178,21 +231,21 @@ function Worldcup() {
             <div className='image_box'>
               <img
                 className='image_left'
-                src={game[left].src}
-                onClick={leftFunction}
+                src={state.game[left].src}
+                onClick={() => dispatch({ type: 'click', value: left })}
               />
               <div className='image_text left'>
-                <p>{game[round * 2].name}</p>
+                <p>{state.game[state.round * 2].name}</p>
               </div>
             </div>
             <div className='image_box'>
               <img
                 className='image_right'
-                src={game[right].src}
-                onClick={rightFunction}
+                src={state.game[right].src}
+                onClick={() => dispatch({ type: 'click', value: right })}
               />
               <div className='image_text right'>
-                <p>{game[right].name}</p>
+                <p>{state.game[right].name}</p>
               </div>
             </div>
           </>
